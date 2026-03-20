@@ -81,7 +81,21 @@ Options:
 npx firmis-scanner scan .
 ```
 
-[Firmis Scanner](https://github.com/firmislabs/firmis-scanner) detects security threats across 9 AI agent platforms with 227 rules.
+[Firmis Scanner](https://github.com/firmislabs/firmis-scanner) detects security threats across 9 AI agent platforms with 242 rules.
+
+## FAQ
+
+**What does ai-inventory detect?**
+8 agent frameworks (CrewAI, LangChain, AutoGen, MCP, etc.), 35+ LLM/ML dependencies across npm and pip, and model files in 9 formats. Returns structured JSON with capability metadata.
+
+**How is this different from firmis scan?**
+ai-inventory discovers what AI tools exist. firmis scan checks them for security threats. Use ai-inventory first to see what you have, then firmis scan to find vulnerabilities. ai-inventory is the asset map, firmis is the security audit.
+
+**Can agents consume the output?**
+Yes. The `--manifest` flag outputs a minimal discovery manifest with component capabilities and an interop graph showing which components can communicate. Designed for agent orchestration systems.
+
+**Is it free?**
+Yes, Apache-2.0 licensed. Zero install: `npx @firmislabs/ai-inventory`.
 
 ## License
 

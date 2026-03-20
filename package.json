@@ -61,7 +61,7 @@
   "bugs": {
     "url": "https://github.com/firmislabs/ai-inventory/issues"
   },
-  "homepage": "https://github.com/firmislabs/ai-inventory#readme",
+  "homepage": "https://firmislabs.com",
   "engines": {
     "node": ">=20.0.0"
   },
