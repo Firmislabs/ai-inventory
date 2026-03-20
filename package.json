@@ -1,5 +1,5 @@
 {
-  "name": "@firmis/ai-inventory",
+  "name": "@firmislabs/ai-inventory",
   "version": "0.2.0",
   "description": "AI tech stack discovery for agents. Detect frameworks, LLM SDKs, vector stores, and model files. Machine-readable inventory for agent orchestration and inter-agent discovery.",
   "type": "module",
