@@ -1,7 +1,7 @@
 {
   "name": "@firmis/ai-inventory",
-  "version": "0.1.0",
-  "description": "Detect AI frameworks, LLM dependencies, and model files in any project. One command to know what AI is in your codebase.",
+  "version": "0.2.0",
+  "description": "AI tech stack discovery for agents. Detect frameworks, LLM SDKs, vector stores, and model files. Machine-readable inventory for agent orchestration and inter-agent discovery.",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -46,7 +46,11 @@
     "gguf",
     "safetensors",
     "sbom",
-    "supply-chain"
+    "supply-chain",
+    "agent-discovery",
+    "agent-metadata",
+    "service-registry",
+    "interop"
   ],
   "author": "Firmis Labs",
   "license": "Apache-2.0",

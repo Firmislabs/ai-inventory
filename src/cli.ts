@@ -2,6 +2,8 @@
 
 import { resolve } from 'node:path'
 import { inventory } from './inventory.js'
+import { buildInteropGraph } from './capabilities.js'
+import type { AgentManifest, InventoryComponent } from './capabilities.js'
 
 const CATEGORY_LABELS: Record<string, string> = {
   'llm-sdk': 'LLM SDKs',
@@ -12,9 +14,15 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 async function main(): Promise<void> {
   const args = process.argv.slice(2)
-  const jsonFlag = args.includes('--json')
+  const humanFlag = args.includes('--human')
+  const manifestFlag = args.includes('--manifest')
   const filteredArgs = args.filter(
-    (a) => a !== '--json' && a !== '--help' && a !== '-h'
+    a =>
+      a !== '--json' &&
+      a !== '--human' &&
+      a !== '--manifest' &&
+      a !== '--help' &&
+      a !== '-h'
   )
 
   if (args.includes('--help') || args.includes('-h')) {
@@ -25,28 +33,44 @@ async function main(): Promise<void> {
   const targetPath = resolve(filteredArgs[0] ?? '.')
   const result = await inventory(targetPath)
 
-  if (jsonFlag) {
-    console.log(JSON.stringify(result, null, 2))
+  if (manifestFlag) {
+    const manifest: AgentManifest = {
+      schema: 'ai-inventory/v1',
+      timestamp: new Date().toISOString(),
+      path: targetPath,
+      components: result.components,
+      graph: buildInteropGraph(result.components),
+    }
+    console.log(JSON.stringify(manifest, null, 2))
     return
   }
 
-  printReport(result)
+  if (humanFlag) {
+    printReport(result)
+    return
+  }
+
+  // Default: JSON output (machine-readable)
+  console.log(JSON.stringify(result, null, 2))
 }
 
 function printUsage(): void {
   console.log(`
-ai-inventory — Detect AI in any project
+ai-inventory — AI tech stack discovery for agents and humans
 
 Usage:
   npx @firmis/ai-inventory [path] [options]
 
 Options:
-  --json    Output as JSON
-  --help    Show this help
+  --manifest  Output minimal agent discovery manifest with interop graph
+  --human     Output human-readable report
+  --json      Output full JSON (default)
+  --help      Show this help
 
 Examples:
   npx @firmis/ai-inventory .
-  npx @firmis/ai-inventory ./my-project --json
+  npx @firmis/ai-inventory ./my-project --manifest
+  npx @firmis/ai-inventory ./my-project --human
 `)
 }
 
@@ -56,9 +80,7 @@ function printReport(
   const { summary, framework, dependencies, models } = result
 
   console.log('')
-  console.log(
-    `  AI Inventory: ${result.path}`
-  )
+  console.log(`  AI Inventory: ${result.path}`)
   console.log('  ' + '─'.repeat(50))
 
   if (!summary.hasAI) {
@@ -80,7 +102,7 @@ function printReport(
     console.log('')
     console.log(`  Dependencies (${dependencies.length}):`)
 
-    const grouped = groupBy(dependencies, (d) => d.category)
+    const grouped = groupBy(dependencies, d => d.category)
     for (const [category, deps] of Object.entries(grouped)) {
       const label = CATEGORY_LABELS[category] ?? category
       console.log(`    ${label}:`)
@@ -99,9 +121,7 @@ function printReport(
       const size = model.sizeMB
         ? ` (${model.sizeMB.toFixed(1)} MB)`
         : ''
-      console.log(
-        `    - ${model.name} [${model.format}]${size}`
-      )
+      console.log(`    - ${model.name} [${model.format}]${size}`)
     }
   }
 
@@ -111,6 +131,10 @@ function printReport(
     `  Found: ${summary.dependencyCount} deps, ${summary.modelCount} models`
   )
 
+  if (result.components.length > 0) {
+    printCapabilities(result.components)
+  }
+
   if (summary.dependencyCount > 0) {
     console.log(
       `  Scan for security threats: npx @firmis/scanner scan .`
@@ -118,6 +142,28 @@ function printReport(
   }
 
   console.log('')
+}
+
+function printCapabilities(
+  components: InventoryComponent[]
+): void {
+  console.log('')
+  console.log('  Agent Capabilities:')
+
+  const byRole = groupBy(components, c => c.capability.role)
+  for (const [role, comps] of Object.entries(byRole)) {
+    const names = comps.map(c => c.name).join(', ')
+    console.log(`    ${role}: ${names}`)
+  }
+
+  const edges = buildInteropGraph(components)
+  if (edges.length > 0) {
+    console.log('')
+    console.log(`  Interop Graph (${edges.length} connections):`)
+    for (const edge of edges) {
+      console.log(`    ${edge.from} <-> ${edge.to} via ${edge.via}`)
+    }
+  }
 }
 
 function groupBy<T>(

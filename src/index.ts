@@ -8,4 +8,11 @@ export { detectModelFiles } from './model-detector.js'
 export type { ModelFileInfo } from './model-detector.js'
 
 export { inventory } from './inventory.js'
-export type { InventoryResult } from './inventory.js'
+export type { InventoryResult, InventoryComponent } from './inventory.js'
+
+export type {
+  AgentCapability,
+  AgentManifest,
+  InteropEdge,
+} from './capabilities.js'
+export { buildInteropGraph } from './capabilities.js'
